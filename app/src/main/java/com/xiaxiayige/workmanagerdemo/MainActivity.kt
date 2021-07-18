@@ -5,9 +5,12 @@ import android.util.Log
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.work.*
+import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
-    lateinit var workManager: WorkManager
+
+    private lateinit var workManager: WorkManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -16,8 +19,15 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btn_getlocation)
             .setOnClickListener {
 //                getLocation()
-                getAnduploadLocation()
+//                getAnduploadLocation()
+                testAAAA()
             }
+    }
+
+    private fun testAAAA() {
+        val getLocation =
+            PeriodicWorkRequestBuilder<LocationWorker>(1, TimeUnit.MINUTES).build()
+        workManager.enqueue(getLocation)
     }
 
     /**
