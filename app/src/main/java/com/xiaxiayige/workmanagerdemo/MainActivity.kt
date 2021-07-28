@@ -2,12 +2,15 @@ package com.xiaxiayige.workmanagerdemo
 
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.work.*
 import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
+
+    private val TAG = "MainActivity"
 
     private lateinit var workManager: WorkManager
 
@@ -20,11 +23,52 @@ class MainActivity : AppCompatActivity() {
             .setOnClickListener {
 //                getLocation()
 //                getAnduploadLocation()
-                testAAAA()
+//                testPeriodic()
+                testConstraints()
             }
     }
 
-    private fun testAAAA() {
+    /**
+     * 测试约束条件-网络连接的时候执行
+     *
+     * 测试 1 步骤
+     * 1.   断网，执行方法
+     * 2.   杀掉程序
+     * 3.   联网
+     * getLocation会运行吗？
+     *
+     * 测试 2 步骤
+     *  1.   断网，执行方法
+     *  2.   杀掉程序
+     *  3.   联网
+     *  4.  进入程序 ，
+     * getLocation会运行吗？
+     *
+     * 测试 3 步骤
+     *  1.   断网，执行方法
+     *  2.   重启手机
+     *  3.   联网
+     *  4.  进入程序 ，
+     *  getLocation会运行吗？
+     */
+    private fun testConstraints() {
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        val getLocationWorker = OneTimeWorkRequestBuilder<LocationWorker>()
+            .setConstraints(constraints)
+            .build()
+
+        workManager.beginWith(getLocationWorker).enqueue()
+
+        Log.i("aaa", "testConstraints")
+    }
+
+    /**
+     * 周期内运行的任务
+     */
+    private fun testPeriodic() {
         val getLocation =
             PeriodicWorkRequestBuilder<LocationWorker>(1, TimeUnit.MINUTES).build()
         workManager.enqueue(getLocation)
@@ -57,11 +101,13 @@ class MainActivity : AppCompatActivity() {
 
         })
         //beginUniqueWork 避免重复添加 Work
+
         workManager.beginUniqueWork(
             "testxxxxx",
             ExistingWorkPolicy.KEEP, //@See More
             getLocationWorkerRequest
-        ).then(uploadRequest).enqueue()
+        ).
+        then(uploadRequest).enqueue()
 
     }
 
@@ -94,5 +140,13 @@ class MainActivity : AppCompatActivity() {
 //                    uploadLocation(outputData)
                 }
             })
+    }
+
+    fun longruntime(view: View) {
+        val downloadWork = OneTimeWorkRequestBuilder<DownloadWork>().build()
+        val locationWorker = OneTimeWorkRequestBuilder<LocationWorker>().build()
+        workManager
+            .beginUniqueWork("download", ExistingWorkPolicy.KEEP, locationWorker)
+            .enqueue()
     }
 }

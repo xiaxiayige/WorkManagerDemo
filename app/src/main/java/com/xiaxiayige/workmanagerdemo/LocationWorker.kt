@@ -13,7 +13,9 @@ class LocationWorker(context: Context, workerParams: WorkerParameters) :
         val data = Data.Builder()
             .putString("location", getLocation())
             .build()
-        return Result.failure()
+        return Result.success(data)
+//        return Result.success()
+//        return Result.failure()
     }
 
     private fun getLocation(): String {
